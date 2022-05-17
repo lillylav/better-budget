@@ -1,16 +1,19 @@
+const indexedDB = window.indexedDB;
+
 // create variable to hold db connection
 let db;
 
-// establish a connection to IndexedDB database called 'better_budget' and set it to version 1
-const request = indexedDB.open('better_budget', 1);
+// establish a connection to IndexedDB database called 'better' and set it to version 1
+const request = indexedDB.open('better', 1);
 
 // this event will emit if the database version changes (nonexistant to version 1, v1 to v2, etc.)
 request.onupgradeneeded = function(event) {
     // save a reference to the database 
-    const db = event.target.result;
-    // create an object store (table) called `better_budget`, set it to have an auto incrementing primary key of sorts 
-    db.createObjectStore('better_budget', { autoIncrement: true });
+    let db = event.target.result;
+    // create an object store (table) called `better`, set it to have an auto incrementing primary key of sorts 
+    db.createObjectStore('pending', { autoIncrement: true });
 };
+
 
 // upon a successful 
 request.onsuccess = function(event) {
@@ -28,13 +31,18 @@ request.onsuccess = function(event) {
     console.log(event.target.errorCode);
 };
 
+// upon error
+request.onerror = function(event) {
+    console.log("Holy cow! " + event.target.errorCode);
+};
+
 // This function will be executed if we attempt to submit a new transaction and there's no internet connection
 function saveRecord(record) {
     // open a new transaction with the database with read and write permissions 
-    const transaction = db.transaction(['new_transaction'], 'readwrite');
+    const transaction = db.transaction(['pending'], 'readwrite');
   
-    // access the object store for `new_transaction`
-    const transactionObjectStore = transaction.objectStore('new_transaction');
+    // access the object store for `pending`
+    const transactionObjectStore = transaction.objectStore('pending');
   
     // add record to your store with add method
     transactionObjectStore.add(record);
@@ -42,10 +50,10 @@ function saveRecord(record) {
 
 function uploadTransactions() {
     // open a transaction on your db
-    const transaction = db.transaction(['new_transaction'], 'readwrite');
+    const transaction = db.transaction(['pending'], 'readwrite');
 
     // access your object store
-    const transactionObjectStore = transaction.objectStore('new_transaction');
+    const transactionObjectStore = transaction.objectStore('pending');
 
     // get all records from store and set to a variable
     const getAll = transactionObjectStore.getAll();
@@ -67,9 +75,9 @@ function uploadTransactions() {
             throw new Error(serverResponse);
         }
         // open one more transaction
-        const transaction = db.transaction(['new_transaction'], 'readwrite');
-        // access the new_transaction object store
-        const pizzaObjectStore = transaction.objectStore('new_transaction');
+        const transaction = db.transaction(['pending'], 'readwrite');
+        // access the pending object store
+        const pizzaObjectStore = transaction.objectStore('pending');
         // clear all items in your store
         pizzaObjectStore.clear();
 
